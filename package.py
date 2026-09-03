@@ -119,3 +119,4 @@ manifest[0]["versions"] = [v for v in manifest[0]["versions"] if v.get("version"
 
 manifest[0]["versions"].insert(0, entry)
 print(json.dumps(manifest, indent=4), file=open("manifest.json", "w"))
+shutil.copy("manifest.json", "release/manifest.json")

@@ -9,7 +9,8 @@ Don't expect perfection.
 # Instructions
 ### Installation
 
-Add the Repo url to Jellyfin using `https://raw.githubusercontent.com/gooner-dev99/JellyfinJAV/master/manifest.json`
+Add the Repo url to Jellyfin using the `manifest.json` asset from the latest GitHub release:
+`https://github.com/gooner-dev99/JellyfinJAV/releases/latest/download/manifest.json`
 
 
 ### Usage
