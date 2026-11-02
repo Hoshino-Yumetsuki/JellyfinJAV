@@ -2,6 +2,6 @@
 set -e
 
 (cd JellyfinJav; dotnet build)
-mkdir -p ./docker-config/plugins
-docker-compose kill
-docker-compose up -d
+mkdir -p ./config/plugins/JellyfinJav
+docker compose kill
+docker compose up -d

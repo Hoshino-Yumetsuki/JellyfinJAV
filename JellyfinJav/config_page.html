@@ -45,25 +45,25 @@
         <script type="text/javascript">
             var pluginUniqueId = '1d5fffc2-1028-4553-9660-bd4966899e44';
 
-            $('#JellyfinJavConfigPage').on('pageshow', () => {
+            document.getElementById('JellyfinJavConfigPage').addEventListener('pageshow', () => {
                 ApiClient.getPluginConfiguration(pluginUniqueId).then(config => {
-                    $('#actressNameOrder').val(config.actressNameOrder).change();
-                    $('#videoDisplayName').val(config.videoDisplayName).change();
-                    document.getElementById('enableActresses').checked = config.enableActresses;
+                    document.getElementById('actressNameOrder').value = config.ActressNameOrder;
+                    document.getElementById('videoDisplayName').value = config.VideoDisplayName;
+                    document.getElementById('enableActresses').checked = config.EnableActresses;
                 });
             });
 
-            $('#JellyfinJavConfigForm').on('submit', function () {
+            document.getElementById('JellyfinJavConfigForm').addEventListener('submit', function (event) {
+                event.preventDefault();
                 ApiClient.getPluginConfiguration(pluginUniqueId).then(config => {
-                    config.actressNameOrder = $('#actressNameOrder').val();
-                    config.videoDisplayName = $('#videoDisplayName').val();
-                    config.enableActresses = document.getElementById('enableActresses').checked;
+                    config.ActressNameOrder = document.getElementById('actressNameOrder').value;
+                    config.VideoDisplayName = document.getElementById('videoDisplayName').value;
+                    config.EnableActresses = document.getElementById('enableActresses').checked;
 
                     ApiClient.updatePluginConfiguration(pluginUniqueId, config).then(function (result) {
                         Dashboard.processPluginConfigurationUpdateResult(result);
                     });
                 });
-                return false;
             });
         </script>
     </div>

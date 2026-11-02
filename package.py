@@ -92,13 +92,15 @@ for file_path in build_output_dir.glob("*"):
     if file_path.is_file():
         shutil.copy(file_path, plugin_dir / file_path.name)
 
-anglesharp_path = Path(f"{Path.home()}/.nuget/packages/anglesharp/{anglesharp_version}/lib/netstandard2.0/AngleSharp.dll")
-if anglesharp_path.exists():
-    shutil.copy(anglesharp_path, plugin_dir / "AngleSharp.dll")
-
-npgsql_path = Path(f"{Path.home()}/.nuget/packages/npgsql/{npgsql_version}/lib/net8.0/Npgsql.dll")
-if npgsql_path.exists():
-    shutil.copy(npgsql_path, plugin_dir / "Npgsql.dll")
+nuget_packages = Path(os.environ.get("NUGET_PACKAGES", Path.home() / ".nuget/packages"))
+runtime_dependencies = [
+    nuget_packages / f"anglesharp/{anglesharp_version}/lib/netstandard2.0/AngleSharp.dll",
+    nuget_packages / f"npgsql/{npgsql_version}/lib/net8.0/Npgsql.dll",
+]
+for dependency in runtime_dependencies:
+    if not dependency.is_file():
+        raise FileNotFoundError(f"Required plugin dependency is missing: {dependency}")
+    shutil.copy(dependency, plugin_dir / dependency.name)
 
 shutil.make_archive(f"release/jellyfinjav_{version}", "zip", plugin_dir)
 

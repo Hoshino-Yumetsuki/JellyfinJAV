@@ -1,6 +1,11 @@
 # JellyfinJav
 Don't expect perfection.
 
+This branch targets Jellyfin **12.x** using the **12.0.0** plugin APIs and
+**.NET 10**. Jellyfin 12 requires plugins to be retargeted and rebuilt; see the
+[official release notes](https://github.com/jellyfin/jellyfin/releases/tag/v12.0).
+Older Jellyfin 10.11 builds remain in the catalog for older servers.
+
 # Metadata Providers
 * R18.dev (Videos)
 * AsianScreens (Actresses)
@@ -28,15 +33,44 @@ When adding the media library, make sure to select "Content type: movies".
 * Docker
 * Docker Compose
 * Python
-* .NET 9.0
+* .NET 10.0 SDK
+* Node.js 24 (for settings-page tests)
 
 ### Building
+
+To build without starting Docker:
+
+    $ dotnet restore JellyfinJav.sln
+    $ dotnet build JellyfinJav.sln --configuration Release --no-restore
+
+To build and start the development server (the Compose file pins Jellyfin 12.0):
+
     $ ./build.sh
-    # Visit localhost:8096
+    # Visit localhost:8896
 
 ### Packaging
     $ python package.py
     # manifest.json will update, and the package will be zipped up in release/
+
+Packaging derives ABI `12.0.0.0` from the Jellyfin.Controller reference and adds
+a new catalog entry with the ZIP's checksum, preserving existing releases.
+It requires a successful Release build and copies AngleSharp and Npgsql from
+`NUGET_PACKAGES` (or `~/.nuget/packages` by default). Upload the ZIP and generated
+`release/manifest.json` together to the matching GitHub release.
+
+The checked-in catalog only lists previously packaged releases. Run packaging
+after validating the build to add the new `2026.11.02.0` release.
+
+### Validation
+
+    $ node --test Tests/config_page.test.cjs
+    $ dotnet test Tests/Tests.csproj --configuration Release --no-restore
+
+The settings-page tests run without Jellyfin or a database. The existing R18
+tests require a populated PostgreSQL database and contain legacy fixture
+assertions; they do not provide an isolated compatibility check. Before
+publishing, also verify plugin loading, saving settings, movie identification
+and refresh, and movie/person artwork on Jellyfin 12 with a configured database.
 
 ### General
 JAV files for testing purposes are stored in videos/
