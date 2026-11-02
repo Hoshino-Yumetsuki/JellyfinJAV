@@ -58,8 +58,8 @@ It requires a successful Release build and copies AngleSharp and Npgsql from
 `NUGET_PACKAGES` (or `~/.nuget/packages` by default). Upload the ZIP and generated
 `release/manifest.json` together to the matching GitHub release.
 
-The checked-in catalog only lists previously packaged releases. Run packaging
-after validating the build to add the new `2026.11.02.0` release.
+The checked-in catalog includes release `2026.11.02.0` for Jellyfin 12, while
+preserving previous releases for older servers.
 
 ### Validation
 
