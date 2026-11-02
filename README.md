@@ -21,6 +21,13 @@ Add the Repo url to Jellyfin using the `manifest.json` asset from the latest Git
 ### Usage
 When adding the media library, make sure to select "Content type: movies".
 
+Movie titles prefer the original English title, then the latest nonempty English
+machine translation from the imported dump, then the Japanese title. Refresh
+existing movie metadata to apply title updates.
+
+Actresses appear in Jellyfin's cast/people list as Actors; there is no separate
+Actress metadata field. The plugin settings control their name order.
+
 ### Example File Names
 * abp200.mkv
 * ABP200.mkv
@@ -58,8 +65,12 @@ It requires a successful Release build and copies AngleSharp and Npgsql from
 `NUGET_PACKAGES` (or `~/.nuget/packages` by default). Upload the ZIP and generated
 `release/manifest.json` together to the matching GitHub release.
 
-The checked-in catalog includes release `2026.11.02.0` for Jellyfin 12, while
+The checked-in catalog includes release `2026.11.02.1` for Jellyfin 12, while
 preserving previous releases for older servers.
+
+Add release notes under the matching version heading in `CHANGELOG.md` before
+packaging. The notes are included in the catalog and the ZIP's `meta.json` for
+Jellyfin's plugin page.
 
 ### Validation
 

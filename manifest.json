@@ -2,11 +2,19 @@
     {
         "category": "Metadata",
         "guid": "1d5fffc2-1028-4553-9660-bd4966899e44",
-        "name": "JellyfinJAV",
+        "name": "Jellyfin JAV",
         "description": "JAV metadata providers for Jellyfin.",
         "owner": "gooner-dev99",
         "overview": "JAV metadata providers for Jellyfin.",
         "versions": [
+            {
+                "checksum": "883a63bbff0d656c4977d32ae275d27e",
+                "changelog": "- Use the latest nonempty English machine translation when a movie has no original English title.\n- Preserve original English titles, with Japanese titles as the fallback when no English translation is available.\n- Preserve actress names during person metadata updates so movie cast links stay visible in Jellyfin.\n- Include release notes in the plugin catalog and installed plugin metadata so Jellyfin can display the changelog.\n- Keep the packaged plugin name consistent with Jellyfin's loaded plugin name and normalize its metadata version to prevent duplicate-version restart loops.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://github.com/gooner-dev99/JellyfinJAV/releases/download/v2026.11.02.1/jellyfinjav_2026.11.02.1.zip",
+                "timestamp": "2026-11-02T22:02:21Z",
+                "version": "2026.11.02.1"
+            },
             {
                 "checksum": "b5262caa0834551686b3b31904762112",
                 "changelog": "",

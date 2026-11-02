@@ -149,7 +149,16 @@ namespace JellyfinJav.Api
                 SELECT
                     v.content_id,
                     v.dvd_id,
-                    COALESCE(NULLIF(v.title_en, ''), NULLIF(v.title_ja, ''), v.dvd_id) AS title,
+                    COALESCE(
+                        NULLIF(BTRIM(v.title_en), ''),
+                        (SELECT NULLIF(BTRIM(t.target_en), '')
+                         FROM public.machine_translation t
+                         WHERE t.source_ja = v.title_ja
+                           AND NULLIF(BTRIM(t.target_en), '') IS NOT NULL
+                         ORDER BY t.timestamp DESC, t.id DESC
+                         LIMIT 1),
+                        NULLIF(BTRIM(v.title_ja), ''),
+                        v.dvd_id) AS title,
                     v.release_date,
                     COALESCE(l.name_en, m.name_en, s.name_en) AS studio,
                     v.jacket_full_url,

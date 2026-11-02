@@ -73,13 +73,12 @@ namespace JellyfinJav.Providers.AsianscreensProvider
 
             return new MetadataResult<Person>
             {
-                // Changing the actress name but still keeping them associated with
-                // their videos will be a challenge.
+                // Movie cast associations use the lookup name, so keep it stable.
                 Item = new Person
                 {
-                    Name = string.IsNullOrWhiteSpace(actress.Value.Name)
-                        ? (string.IsNullOrWhiteSpace(info.Name) ? actress.Value.Id : info.Name)
-                        : actress.Value.Name,
+                    Name = !string.IsNullOrWhiteSpace(info.Name)
+                        ? info.Name
+                        : (string.IsNullOrWhiteSpace(actress.Value.Name) ? actress.Value.Id : actress.Value.Name),
                     ProviderIds = new Dictionary<string, string> { { "Asianscreens", actress.Value.Id } },
                     PremiereDate = actress.Value.Birthdate,
                     ProductionLocations = new[] { actress.Value.Birthplace }.Where(i => i is string).ToArray(),

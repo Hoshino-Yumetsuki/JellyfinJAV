@@ -46,10 +46,24 @@ def normalize_abi_version(version: str) -> str:
     return cleaned
 
 
+def read_changelog(version: str) -> str:
+    contents = Path("CHANGELOG.md").read_text(encoding="utf-8")
+    match = re.search(
+        rf"^## {re.escape(version)}\s*\n(.*?)(?=^## |\Z)",
+        contents,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if not match or not match.group(1).strip():
+        raise ValueError(f"Missing changelog for release {version}")
+    return match.group(1).strip()
+
+
 import os
 
 tree = ET.parse("JellyfinJav/JellyfinJav.csproj")
 version = tree.find("./PropertyGroup/AssemblyVersion").text
+changelog = read_changelog(version)
+metadata_version = ".".join(str(int(part)) for part in version.split("."))
 target_framework = tree.find("./PropertyGroup/TargetFramework").text
 target_abi_raw = tree.find("./ItemGroup/*[@Include='Jellyfin.Controller']").attrib["Version"]
 target_abi = normalize_abi_version(target_abi_raw)
@@ -62,13 +76,14 @@ repo_owner = repo_slug.split("/")[0]
 meta = {
     "category": "Metadata",
     "guid": "1d5fffc2-1028-4553-9660-bd4966899e44",
-    "name": "JellyfinJav",
+    "name": "Jellyfin JAV",
+    "changelog": changelog,
     "description": "JAV metadata providers for Jellyfin.",
     "owner": repo_owner,
     "overview": "JAV metadata providers for Jellyfin.",
     "targetAbi": target_abi,
     "timestamp": timestamp,
-    "version": version
+    "version": metadata_version
 }
 
 Path(f"release/{version}").mkdir(parents=True, exist_ok=True)
@@ -106,7 +121,7 @@ shutil.make_archive(f"release/jellyfinjav_{version}", "zip", plugin_dir)
 
 entry = {
     "checksum": md5(open(f"release/jellyfinjav_{version}.zip", "rb").read()).hexdigest(),
-    "changelog": "",
+    "changelog": changelog,
     "targetAbi": target_abi,
     "sourceUrl": f"https://github.com/{repo_slug}/releases/download/v{version}/jellyfinjav_{version}.zip",
     "timestamp": timestamp,
@@ -116,6 +131,7 @@ entry = {
 manifest = json.loads(open("manifest.json", "r").read())
 
 manifest[0]["owner"] = repo_owner
+manifest[0]["name"] = meta["name"]
 
 manifest[0]["versions"] = [v for v in manifest[0]["versions"] if v.get("version") != version]
 
