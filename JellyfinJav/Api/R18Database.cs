@@ -18,13 +18,17 @@ namespace JellyfinJav.Api
         private const string PasswordEnvVar = "JELLYFINJAV_R18_DB_PASSWORD";
         private const string SslModeEnvVar = "JELLYFINJAV_R18_DB_SSL_MODE";
 
-        private static readonly object SyncRoot = new object();
-        private static NpgsqlDataSource? dataSource;
-        private static bool configurationEvaluated;
+        private static readonly Lazy<NpgsqlDataSource?> DataSource = new(() =>
+        {
+            var connectionString = BuildConnectionString();
+            return connectionString is null ? null : new NpgsqlDataSourceBuilder(connectionString).Build();
+        });
+
+        public static bool IsConfigured => DataSource.Value is not null;
 
         public static async Task<(Video? Video, HttpStatusCode StatusCode)> LoadVideoWithStatus(string id)
         {
-            var configuredDataSource = GetConfiguredDataSource();
+            var configuredDataSource = DataSource.Value;
             if (configuredDataSource is null)
             {
                 return (null, HttpStatusCode.ServiceUnavailable);
@@ -62,29 +66,6 @@ namespace JellyfinJav.Api
                     },
                 },
                 statusCode);
-        }
-
-        private static NpgsqlDataSource? GetConfiguredDataSource()
-        {
-            if (configurationEvaluated)
-            {
-                return dataSource;
-            }
-
-            lock (SyncRoot)
-            {
-                if (!configurationEvaluated)
-                {
-                    configurationEvaluated = true;
-                    var connectionString = BuildConnectionString();
-                    if (!string.IsNullOrWhiteSpace(connectionString))
-                    {
-                        dataSource = new NpgsqlDataSourceBuilder(connectionString).Build();
-                    }
-                }
-
-                return dataSource;
-            }
         }
 
         private static string? BuildConnectionString()

@@ -55,7 +55,7 @@ namespace JellyfinJav.Providers.R18Provider
             {
                 var r18Id = info.ProviderIds["R18"];
                 this.logger.LogInformation("[JellyfinJav] R18 - Metadata lookup by provider id: " + r18Id);
-                var (videoById, metadataStatusCodeById) = await R18Client.LoadVideoWithStatus(r18Id).ConfigureAwait(false);
+                var (videoById, metadataStatusCodeById) = await R18Client.LoadVideoWithStatus(r18Id, cancelToken).ConfigureAwait(false);
                 video = videoById;
                 this.logger.LogInformation("[JellyfinJav] R18 - Metadata lookup response for provider id {R18Id}: HTTP {StatusCode} ({StatusName}), has value: {HasValue}", r18Id, (int)metadataStatusCodeById, metadataStatusCodeById, video.HasValue);
             }
@@ -68,7 +68,7 @@ namespace JellyfinJav.Providers.R18Provider
                     return new MetadataResult<Movie>();
                 }
 
-                var (videoBySearch, metadataStatusCodeBySearch) = await R18Client.SearchFirstWithStatus(code).ConfigureAwait(false);
+                var (videoBySearch, metadataStatusCodeBySearch) = await R18Client.SearchFirstWithStatus(code, cancelToken).ConfigureAwait(false);
                 video = videoBySearch;
                 this.logger.LogInformation("[JellyfinJav] R18 - SearchFirst response for code {Code}: HTTP {StatusCode} ({StatusName}), has value: {HasValue}", code, (int)metadataStatusCodeBySearch, metadataStatusCodeBySearch, video.HasValue);
             }
@@ -104,7 +104,7 @@ namespace JellyfinJav.Providers.R18Provider
             if (info.ProviderIds.TryGetValue("R18", out var providerId) && !string.IsNullOrWhiteSpace(providerId))
             {
                 this.logger.LogInformation("[JellyfinJav] R18 - Identify search using provider id: {R18Id}", providerId);
-                var (videoById, identifyStatusCodeById) = await R18Client.LoadVideoWithStatus(providerId).ConfigureAwait(false);
+                var (videoById, identifyStatusCodeById) = await R18Client.LoadVideoWithStatus(providerId, cancelToken).ConfigureAwait(false);
                 this.logger.LogInformation("[JellyfinJav] R18 - Identify search response for provider id {R18Id}: HTTP {StatusCode} ({StatusName}), has value: {HasValue}", providerId, (int)identifyStatusCodeById, identifyStatusCodeById, videoById.HasValue);
                 if (!videoById.HasValue)
                 {
@@ -142,7 +142,7 @@ namespace JellyfinJav.Providers.R18Provider
 
             this.logger.LogInformation("[JellyfinJav] R18 - Getting Code: " + javCode);
 
-            var (searchResults, searchStatusCode) = await R18Client.SearchWithStatus(javCode).ConfigureAwait(false);
+            var (searchResults, searchStatusCode) = await R18Client.SearchWithStatus(javCode, cancelToken).ConfigureAwait(false);
             this.logger.LogInformation("[JellyfinJav] R18 - Search response for code {Code}: HTTP {StatusCode} ({StatusName})", javCode, (int)searchStatusCode, searchStatusCode);
 
             if (searchResults == null || !searchResults.Any())
