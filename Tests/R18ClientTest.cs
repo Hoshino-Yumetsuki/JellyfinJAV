@@ -10,6 +10,15 @@ namespace Tests
 
     public class R18ClientTest
     {
+        [SetUp]
+        public void RequireDatabase()
+        {
+            if (!R18Database.IsConfigured)
+            {
+                Assert.Ignore("Legacy fixtures require an imported PostgreSQL dump.");
+            }
+        }
+
         [Test]
         public async Task TestSearchMany()
         {

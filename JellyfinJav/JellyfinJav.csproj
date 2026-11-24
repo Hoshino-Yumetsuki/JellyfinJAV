@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="config_page.html" />
+    <InternalsVisibleTo Include="Tests" />
   </ItemGroup>
 
 </Project>
