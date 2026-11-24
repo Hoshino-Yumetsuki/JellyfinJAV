@@ -59,7 +59,7 @@ namespace Tests
         }
 
         [Test]
-        [Explicit("Queries the live R18.dev service; run without database environment variables.")]
+        [Explicit("Queries the live R18.dev service.")]
         public async Task LiveBbanLookup()
         {
             var (video, status) = await R18Client.SearchFirstWithStatus("BBAN-613");

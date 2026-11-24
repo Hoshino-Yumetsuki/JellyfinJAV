@@ -21,9 +21,7 @@ Add the Repo url to Jellyfin using the `manifest.json` asset from the latest Git
 ### Usage
 When adding the media library, make sure to select "Content type: movies".
 
-Movie titles prefer the original English title, then the latest nonempty English
-machine translation from the imported dump, then the Japanese title. Refresh
-existing movie metadata to apply title updates.
+The plugin fetches movie metadata directly from R18.dev using the DVD code, not the filename or path. Titles use the site's English title when available, otherwise the Japanese title. No database or dump is required.
 
 Actresses appear in Jellyfin's cast/people list as Actors; there is no separate
 Actress metadata field. The plugin settings control their name order.
@@ -61,7 +59,7 @@ To build and start the development server (the Compose file pins Jellyfin 12.0):
 
 Packaging derives ABI `12.0.0.0` from the Jellyfin.Controller reference and adds
 a new catalog entry with the ZIP's checksum, preserving existing releases.
-It requires a successful Release build and copies AngleSharp and Npgsql from
+It requires a successful Release build and copies AngleSharp from
 `NUGET_PACKAGES` (or `~/.nuget/packages` by default). Upload the ZIP and generated
 `release/manifest.json` together to the matching GitHub release.
 
@@ -77,27 +75,13 @@ Jellyfin's plugin page.
     $ node --test Tests/config_page.test.cjs
     $ dotnet test Tests/Tests.csproj --configuration Release --no-restore
 
-The settings-page tests run without Jellyfin or a database. The existing R18
-tests require a populated PostgreSQL database and contain legacy fixture
-assertions; they do not provide an isolated compatibility check. Before
-publishing, also verify plugin loading, saving settings, movie identification
-and refresh, and movie/person artwork on Jellyfin 12 with a configured database.
+The settings-page and R18 web-client tests run offline. To also verify `BBAN-613`
+against the live site, run `dotnet test Tests/Tests.csproj --filter Name=LiveBbanLookup`.
+Before publishing, also verify plugin loading, saving settings, movie identification
+and refresh, and movie/person artwork on Jellyfin 12.
 
 ### General
 JAV files for testing purposes are stored in videos/
-
-### R18 Database Environment Variables
-Set these on the Jellyfin container if you want the plugin to query the PostgreSQL database that contains the imported R18 dump.
-
-* `JELLYFINJAV_R18_DB_CONNECTION_STRING`
-* `JELLYFINJAV_R18_DB_HOST`
-* `JELLYFINJAV_R18_DB_PORT`
-* `JELLYFINJAV_R18_DB_NAME`
-* `JELLYFINJAV_R18_DB_USER`
-* `JELLYFINJAV_R18_DB_PASSWORD`
-* `JELLYFINJAV_R18_DB_SSL_MODE`
-
-If `JELLYFINJAV_R18_DB_CONNECTION_STRING` is not set, the plugin builds a connection string from host, port, database, user, and password. If none of the database environment variables are set, the R18 lookup providers return unavailable results.
 
 # Screenshots
 ![Grid Example](screenshots/example-grid.jpg)

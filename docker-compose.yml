@@ -7,6 +7,5 @@ services:
       - /root/media/EC:/media/videos:ro
       - ./JellyfinJav/bin/Debug/net10.0/JellyfinJav.dll:/config/plugins/JellyfinJav/JellyfinJav.dll:ro
       - ~/.nuget/packages/anglesharp/1.1.2/lib/netstandard2.0/AngleSharp.dll:/config/plugins/JellyfinJav/AngleSharp.dll:ro
-      - ~/.nuget/packages/npgsql/8.0.4/lib/net8.0/Npgsql.dll:/config/plugins/JellyfinJav/Npgsql.dll:ro
     ports:
       - 8896:8096

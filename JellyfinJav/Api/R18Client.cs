@@ -9,7 +9,7 @@ namespace JellyfinJav.Api
     using System.Threading;
     using System.Threading.Tasks;
 
-    /// <summary>Looks up videos on R18.dev, or in an explicitly configured local database.</summary>
+    /// <summary>Looks up videos on R18.dev.</summary>
     public static class R18Client
     {
         private static readonly R18WebClient Web = new(new HttpClient { Timeout = TimeSpan.FromSeconds(15) });
@@ -23,7 +23,7 @@ namespace JellyfinJav.Api
 
         /// <summary>Searches by DVD code and returns the provider ID for loading details.</summary>
         public static Task<(IEnumerable<VideoResult> Results, HttpStatusCode StatusCode)> SearchWithStatus(string searchCode, CancellationToken token = default) =>
-            R18Database.IsConfigured ? R18Database.SearchWithStatus(searchCode) : Web.Search(searchCode, token);
+            Web.Search(searchCode, token);
 
         /// <summary>Returns the first matching video.</summary>
         public static async Task<Video?> SearchFirst(string searchCode)
@@ -35,11 +35,6 @@ namespace JellyfinJav.Api
         /// <summary>Resolves a DVD code and loads the video's details.</summary>
         public static async Task<(Video? Video, HttpStatusCode StatusCode)> SearchFirstWithStatus(string searchCode, CancellationToken token = default)
         {
-            if (R18Database.IsConfigured)
-            {
-                return await R18Database.LoadVideoWithStatus(searchCode).ConfigureAwait(false);
-            }
-
             var (results, status) = await Web.Search(searchCode, token).ConfigureAwait(false);
             var result = results.FirstOrDefault();
             return result.Id is null ? (null, status) : await Web.Load(result.Id, token, result.Code).ConfigureAwait(false);
@@ -55,11 +50,6 @@ namespace JellyfinJav.Api
         /// <summary>Loads by R18 content ID; the manual provider-ID field also accepts a DVD code.</summary>
         public static Task<(Video? Video, HttpStatusCode StatusCode)> LoadVideoWithStatus(string id, CancellationToken token = default)
         {
-            if (R18Database.IsConfigured)
-            {
-                return R18Database.LoadVideoWithStatus(id);
-            }
-
             return !string.IsNullOrWhiteSpace(id) && Regex.IsMatch(id.Trim(), @"^[A-Za-z]{2,10}-[0-9]{2,6}$")
                 ? SearchFirstWithStatus(id, token) : Web.Load(id, token);
         }

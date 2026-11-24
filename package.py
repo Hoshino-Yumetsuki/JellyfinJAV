@@ -68,7 +68,6 @@ target_framework = tree.find("./PropertyGroup/TargetFramework").text
 target_abi_raw = tree.find("./ItemGroup/*[@Include='Jellyfin.Controller']").attrib["Version"]
 target_abi = normalize_abi_version(target_abi_raw)
 anglesharp_version = tree.find("./ItemGroup/*[@Include='AngleSharp']").attrib["Version"]
-npgsql_version = tree.find("./ItemGroup/*[@Include='Npgsql']").attrib["Version"]
 timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 repo_slug = detect_github_repo()
 repo_owner = repo_slug.split("/")[0]
@@ -108,14 +107,7 @@ for file_path in build_output_dir.glob("*"):
         shutil.copy(file_path, plugin_dir / file_path.name)
 
 nuget_packages = Path(os.environ.get("NUGET_PACKAGES", Path.home() / ".nuget/packages"))
-runtime_dependencies = [
-    nuget_packages / f"anglesharp/{anglesharp_version}/lib/netstandard2.0/AngleSharp.dll",
-    nuget_packages / f"npgsql/{npgsql_version}/lib/net8.0/Npgsql.dll",
-]
-for dependency in runtime_dependencies:
-    if not dependency.is_file():
-        raise FileNotFoundError(f"Required plugin dependency is missing: {dependency}")
-    shutil.copy(dependency, plugin_dir / dependency.name)
+shutil.copy(nuget_packages / f"anglesharp/{anglesharp_version}/lib/netstandard2.0/AngleSharp.dll", plugin_dir)
 
 shutil.make_archive(f"release/jellyfinjav_{version}", "zip", plugin_dir)
 
