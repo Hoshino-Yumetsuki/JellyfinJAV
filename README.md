@@ -15,7 +15,7 @@ Older Jellyfin 10.11 builds remain in the catalog for older servers.
 ### Installation
 
 Add the Repo url to Jellyfin using the `manifest.json` asset from the latest GitHub release:
-`https://github.com/gooner-dev99/JellyfinJAV/releases/latest/download/manifest.json`
+`https://github.com/Hoshino-Yumetsuki/JellyfinJAV/releases/latest/download/manifest.json`
 
 
 ### Usage
@@ -53,22 +53,16 @@ To build and start the development server (the Compose file pins Jellyfin 12.0):
     $ ./build.sh
     # Visit localhost:8896
 
-### Packaging
-    $ python package.py
-    # manifest.json will update, and the package will be zipped up in release/
+### Packaging and publishing
 
-Packaging derives ABI `12.0.0.0` from the Jellyfin.Controller reference and adds
-a new catalog entry with the ZIP's checksum, preserving existing releases.
-It requires a successful Release build and copies AngleSharp from
-`NUGET_PACKAGES` (or `~/.nuget/packages` by default). Upload the ZIP and generated
-`release/manifest.json` together to the matching GitHub release.
+Set `AssemblyVersion` and `FileVersion` to the new version and add a matching
+heading to `CHANGELOG.md`. Push the commit and its `v<version>` tag to the fork.
+GitHub Actions runs the offline tests, checks that the tag matches the project,
+and publishes the plugin ZIP and `manifest.json` to the tagged release.
+The catalog keeps earlier entries and includes the ZIP's checksum and Jellyfin ABI.
 
-The checked-in catalog includes release `2026.11.02.1` for Jellyfin 12, while
-preserving previous releases for older servers.
-
-Add release notes under the matching version heading in `CHANGELOG.md` before
-packaging. The notes are included in the catalog and the ZIP's `meta.json` for
-Jellyfin's plugin page.
+For a local packaging check, run `python package.py`. It writes the ZIP and
+catalog to `release/` and updates the working copy of `manifest.json`.
 
 ### Validation
 

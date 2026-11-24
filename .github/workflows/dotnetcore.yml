@@ -1,43 +1,62 @@
-name: Build and Test
+name: Build, test and release
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
+    tags: ['v*']
   pull_request:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
 
-jobs:
-  ci:
-    runs-on: ubuntu-latest
+permissions:
+  contents: read
 
+jobs:
+  test:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - run: node --test Tests/config_page.test.cjs
+      - run: dotnet test Tests/Tests.csproj --configuration Release
 
-      - name: Test settings page
-        run: node --test Tests/config_page.test.cjs
-
-      - name: Restore
+  release:
+    needs: test
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Validate tag and package plugin
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          dotnet restore JellyfinJav/JellyfinJav.csproj
-          dotnet restore Tests/Tests.csproj
-
-      - name: Build
-        run: dotnet build JellyfinJav/JellyfinJav.csproj --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test Tests/Tests.csproj --configuration Release --no-restore --verbosity normal
+          version=$(dotnet msbuild JellyfinJav/JellyfinJav.csproj -getProperty:AssemblyVersion)
+          [[ "$GITHUB_REF_NAME" == "v$version" ]] || { printf 'Tag does not match project version %s\n' "$version" >&2; exit 1; }
+          previous=$(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // empty')
+          if [[ -n "$previous" ]]; then
+            gh release download "$previous" --repo "$GITHUB_REPOSITORY" --pattern manifest.json --dir "$RUNNER_TEMP"
+            cp "$RUNNER_TEMP/manifest.json" manifest.json
+          fi
+          python3 package.py
+          zip="release/jellyfinjav_${version}.zip"
+          expected_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/$(basename "$zip")"
+          jq -e --arg url "$expected_url" --arg md5 "$(md5sum "$zip" | cut -d ' ' -f1)" '.[0].versions[0] | .sourceUrl == $url and .checksum == $md5' release/manifest.json
+          jq -er '.[0].versions[0].changelog' release/manifest.json > "$RUNNER_TEMP/notes.md"
+      - name: Publish ZIP and Jellyfin catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release/*.zip release/manifest.json --repo "$GITHUB_REPOSITORY" --verify-tag --title "JellyfinJAV ${GITHUB_REF_NAME#v}" --notes-file "$RUNNER_TEMP/notes.md"
