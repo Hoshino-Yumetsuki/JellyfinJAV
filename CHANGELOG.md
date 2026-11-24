@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026.11.24.0
+
+- Fetch movie metadata directly from R18.dev by DVD code and refresh it by the returned content ID. PostgreSQL, local dumps and their configuration are no longer used.
+- Fix identification of titles such as BBAN-613 when the details endpoint omits the DVD code.
+
 ## 2026.11.02.1
 
 - Use the latest nonempty English machine translation when a movie has no original English title.
